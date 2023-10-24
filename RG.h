@@ -11,6 +11,7 @@ private:
 	double x;
 	double y;
 	double z;
+	double z_;
 	double y_;
 	double e_betta;
 	double e_alpha;
@@ -22,11 +23,12 @@ private:
 protected:
 	inline double f(double x, double y, double z);
 	inline double g(double x, double y, double z);
-	inline double z_(double x, double y, double dy);
+	inline double z__(double x, double y, double dy);
 	inline double y_z(double z);
 
 	inline double EulerF(double x, double f_alpha, int i);
 	inline double EulerB(double x, double f_y, int i);
+	inline double RG::EulerBZ(double x, double f_y, double z_, int i);
 public:
 	void SetXYZ(double x, double y, double z);
 	double GetX();

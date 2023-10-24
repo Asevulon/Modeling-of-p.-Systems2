@@ -90,7 +90,7 @@ void RG::DoRGStepForward()
 	keys.push_back(x);
 }
 
-double RG::z_(double X, double Y, double DY)
+double RG::z__(double X, double Y, double DY)
 {
 	//double res = 0;
 	/*res += Y * (-na * prevVals[counter] * (1 + prevVals[counter]));
@@ -125,16 +125,16 @@ void RG::DoRGStepBack()
 
 
 	double k1 = y_z(cz);
-	double q1 = z_(cx, cy, cz);
+	double q1 = z__(cx, cy, cz);
 
 	double k2 = y_z(cz + h * q1 / 2.);
-	double q2 = z_(cx + h / 2., cy + h * k1 / 2., cz + h * q1 / 2.);
+	double q2 = z__(cx + h / 2., cy + h * k1 / 2., cz + h * q1 / 2.);
 
 	double k3 = y_z(cz + h * q2 / 2.);
-	double q3 = z_(cx + h / 2., cy + h * k2 / 2., cz + h * q2 / 2.);
+	double q3 = z__(cx + h / 2., cy + h * k2 / 2., cz + h * q2 / 2.);
 
 	double k4 = y_z(cz + h * q3);
-	double q4 = z_(cx + h, cy + h * k3, cz + h * q3);
+	double q4 = z__(cx + h, cy + h * k3, cz + h * q3);
 
 
 	y = cy - (k1 + 2 * k2 + 2 * k3 + k4) * h / 6.;
@@ -195,7 +195,7 @@ void RG::test2()
 	counter = e_iter - 1;
 	h = -h;
 	y_ = -e_betta / e_alpha;
-	
+	z = y_;
 	keys.clear();
 	valsY.clear();
 	valsOut.clear();
@@ -211,9 +211,11 @@ void RG::test2()
 	if (differance < 1e-8)stop = true;;
 	prevVals = valsY;
 	
-	/*CString str;
-	str.Format(L"%.7lf", differance);
-	MessageBox(parent, str, L"Differance", MB_ICONINFORMATION);*/
+	if (isnan(differance))
+	{
+		MessageBox(parent, L"NAN has been lockated", L"ERROR", MB_ICONERROR);
+		stop = true;
+	}
 }
 
 
@@ -229,11 +231,22 @@ double RG::EulerF(double x, double f_alpha, int i)
 	return -f_alpha * (-na + na * exp(prevVals[i]) - na * prevVals[i] * exp(prevVals[i]));
 }
 
+double RG::EulerBZ(double x, double f_y, double f_z, int i)
+{
+	return na * f_y * exp(prevVals[i]) - na + na * exp(prevVals[i]) - na * prevVals[i] * exp(prevVals[i]) / f_z;
+}
 void RG::EulerBackward()
 {
-	double cy = y;
+	/*double cy = y;
 	y += y_ * h;
-	y_ += EulerB(x, cy, counter) * h;
+	y_ += EulerB(x, cy, counter) * h;*/
+	double cy = y;
+	double cz = z;
+
+	y += cz * h;
+	z += EulerBZ(x, cy, cz, counter) * h;
+
+
 	x += h;
 	counter--;
 
@@ -245,3 +258,11 @@ double RG::EulerB(double x, double f_y, int i)
 {
 	return na * f_y * exp(prevVals[i]) - na + na * exp(prevVals[i]) - na * prevVals[i] * exp(prevVals[i]);
 }
+
+
+/*
+y' = z(y)
+y'' = z'(y)*z(y)
+
+
+*/
