@@ -35,7 +35,6 @@ void RG::reset()
 {
 	keys.clear();
 	valsY.clear();
-	valsZ.clear();
 	counter = 0;
 }
 int RG::ChangeDirection()
@@ -89,8 +88,6 @@ void RG::DoRGStepForward()
 	x = counter * h;
 
 	keys.push_back(x);
-	alpha.push_back(y);
-	betta.push_back(z);
 }
 
 double RG::z_(double X, double Y, double DY)
@@ -163,7 +160,7 @@ vector<double> RG::MakeStartVals()
 	
 	return res;
 }
-double diff(vector<double>& left, vector<double>right)
+double RG::diff(vector<double>& left, vector<double>&right)
 {
 	double res = 0;
 	for (int i = 0; i < left.size(); i++)
@@ -174,67 +171,77 @@ double diff(vector<double>& left, vector<double>right)
 }
 void RG::DoMainJob()
 {
-		keys.clear();
-		alpha.clear();
-		valsZ.clear();
-		counter = 0;
-		x = 0;
-		y = 1;
-		z = 0;
-		keys.push_back(x);
-		valsY.push_back(y);
-		valsZ.push_back(z);
-		while (x <= L)DoRGStepForward();
-		dy = valsZ[valsZ.size() - 1];
-		y = 0;
-		x = L;
-		keys.clear();
-		valsY.clear();
-		valsZ.clear();
-
-		while (x >= 0)DoRGStepBack();
-		if (diff(valsY, prevVals) < 1e-10)stop = true;
-		prevVals = valsY;
 		
+	
 }
 
 
 void RG::test1()
 {
-	keys.clear();
-	alpha.clear();
-	betta.clear();
+	if (h < 0)h = -h;
+	e_iter = 0;
+	e_alpha = 0;
+	e_betta = psy0;
 	x = 0;
-	y = 10;
-	z = 1;
-	keys.push_back(x);
-	alpha.push_back(y);
-	betta.push_back(z);
-	counter = 0;
-	
-	while (x < L)DoRGStepForward();
+	while (x < L)
+	{
+		EulerForward();
+	}
 }
 void RG::test2()
 {
-	//dy = -psy0 / L;
-	y = z / (dyb / yb - y);
-	z = y * dyb / yb;
 	x = L;
-	dyb = z;
-	yb = y;
+	y = 0;
+	counter = e_iter - 1;
+	h = -h;
+	y_ = -e_betta / e_alpha;
+	
 	keys.clear();
 	valsY.clear();
-	valsZ.clear();
-	keys.push_back(x);
+	valsOut.clear();
+
+	valsOut.push_back(y * fi0);
+	keys.push_back(x * Ld);
 	valsY.push_back(y);
-	valsZ.push_back(z);
-	while (x > 0)
+	while (counter > 0)
 	{
-		DoRGStepBack();
+		EulerBackward();
 	}
-	reverse(valsY.begin(), valsY.end());
-	reverse(keys.begin(), keys.end());
-	if (diff(valsY, prevVals) < 1e-10)stop = true;
+	double differance = diff(valsY, prevVals);
+	if (differance < 1e-8)stop = true;;
 	prevVals = valsY;
-	dy = z;
+	
+	/*CString str;
+	str.Format(L"%.7lf", differance);
+	MessageBox(parent, str, L"Differance", MB_ICONINFORMATION);*/
+}
+
+
+void RG::EulerForward()
+{
+	e_betta += EulerF(x, e_alpha, e_iter) * h;
+	e_alpha += h;
+	x += h;
+	e_iter++;
+}
+double RG::EulerF(double x, double f_alpha, int i)
+{
+	return -f_alpha * (-na + na * exp(prevVals[i]) - na * prevVals[i] * exp(prevVals[i]));
+}
+
+void RG::EulerBackward()
+{
+	double cy = y;
+	y += y_ * h;
+	y_ += EulerB(x, cy, counter) * h;
+	x += h;
+	counter--;
+
+	valsOut.insert(valsOut.begin(), y * fi0);
+	valsY.insert(valsY.begin(), y);
+	keys.insert(keys.begin(), x * Ld);
+}
+double RG::EulerB(double x, double f_y, int i)
+{
+	return na * f_y * exp(prevVals[i]) - na + na * exp(prevVals[i]) - na * prevVals[i] * exp(prevVals[i]);
 }

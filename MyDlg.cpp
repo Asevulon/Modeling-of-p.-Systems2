@@ -19,6 +19,8 @@
 
 MyDlg::MyDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_MODELING_OF_P_SYSTEMS2_DIALOG, pParent)
+	, m_Na(0)
+	, m_Dots(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -27,13 +29,17 @@ void MyDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_PICTURE, drw);
+	DDX_Text(pDX, IDC_EDIT1, m_Na);
+	DDX_Text(pDX, IDC_EDIT2, m_L);
+	DDX_Text(pDX, IDC_EDIT3, m_V);
+	DDX_Text(pDX, IDC_EDIT4, m_Dots);
 }
 
 BEGIN_MESSAGE_MAP(MyDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDOK, &MyDlg::OnBnClickedOk)
-	ON_BN_CLICKED(IDC_BUTTON1, &MyDlg::OnBnClickedButton1)
+	ON_MESSAGE(MS_DO_ITERATION,&MyDlg::OnDoIteration)
 END_MESSAGE_MAP()
 
 
@@ -51,6 +57,14 @@ BOOL MyDlg::OnInitDialog()
 	// TODO: добавьте дополнительную инициализацию
 	drw.SetPadding(10, 5, 22, 22);
 	drw.SetTitle(L"Тестим рунге-кутту");
+	rg.parent = GetSafeHwnd();
+
+	m_V = 1e-7;
+	m_Na = 0.5e23;
+	m_L = 2e-6;
+	m_Dots = 500;
+	UpdateData(FALSE);
+
 	return TRUE;  // возврат значения TRUE, если фокус не передан элементу управления
 }
 
@@ -96,46 +110,46 @@ HCURSOR MyDlg::OnQueryDragIcon()
 void MyDlg::OnBnClickedOk()
 {
 	// TODO: добавьте свой код обработчика уведомлений
-	double Na = 1e-3;
-	double N0 = 1e-4;
-	double fi0 = 0.026;
-	double Ld = sqrt(300 * 11.68 * 8.85418781762039 * 1e-12 * 1.380649 * 1e-23 / (-1.602176634 * 1e-19 * -1.602176634 * 1e-19 * Na));
-	rg.psy0 = 1e-5 / fi0;
-	rg.na = 1e-3 / N0;
-	rg.L = 1e-6 / Ld;
-	rg.SetH(rg.L / 20);
+	//rg.Na = 0.5e23;
+	UpdateData();
+	rg.Na = m_Na;
+	rg.N0 = 1e25;
+	rg.fi0 = 0.026;
+	rg.Ld = sqrt(300 * 11.68 * 8.85418781762039 * 1e-12 * 1.380649 * 1e-23 / (1.602176634 * 1e-19 * 1.602176634 * 1e-19 * rg.Na));
+	//rg.psy0 = 1e-7 / rg.fi0;
+	rg.psy0 = m_V / rg.fi0;
+	rg.na = rg.Na / rg.N0;
+	//rg.L = 2e-6 / rg.Ld;
+	rg.L = m_L / rg.Ld;
+	rg.SetH(rg.L / (m_Dots - 1));
 
 	rg.prevVals = rg.MakeStartVals();
-	rg.dy = -rg.psy0 / rg.L;
-	rg.SetXYZ(0, 1, 0);
-	rg.dyb = rg.dy;
-	rg.yb = 0.1;
-	/*while (!rg.stop)
-	{
-		rg.DoMainJob();
-		drw.SetData(rg.prevVals, rg.keys);
-		drw.Invalidate();
-	}*/
+
+	PostMessage(MS_DO_ITERATION);
 }
 
 
 void MyDlg::OnBnClickedButton1()
 {
 	// TODO: добавьте свой код обработчика уведомлений
-	if (todo)
-	{
 		rg.test1();
-		drw.SetData(rg.alpha, rg.keys);
-		drw.SetTitle(L"alpha");
-		drw.Invalidate();
-		todo = !todo;
-	}
-	else
-	{
 		rg.test2();
-		drw.SetData(rg.valsY, rg.keys);
+		drw.SetData(rg.valsOut, rg.keys);
 		drw.SetTitle(L"y(x)");
 		drw.Invalidate();
-		todo = !todo;
-	}
+		if (rg.stop)MessageBox(L"STOP", L"STOP", MB_OK);
+}
+
+
+LRESULT MyDlg::OnDoIteration(WPARAM wParam, LPARAM lParam)
+{
+	rg.test1();
+	rg.test2();
+	drw.SetData(rg.valsOut, rg.keys);
+	drw.SetTitle(L"y(x)");
+	drw.Invalidate();
+	if (rg.stop)MessageBox(L"STOP", L"STOP", MB_ICONHAND);
+	else PostMessage(MS_DO_ITERATION);
+
+	return NULL;
 }

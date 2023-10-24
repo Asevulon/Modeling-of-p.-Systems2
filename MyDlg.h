@@ -6,6 +6,9 @@
 #include"Drawer.h"
 #include"RG.h"
 
+
+
+
 // Диалоговое окно MyDlg
 class MyDlg : public CDialogEx
 {
@@ -38,4 +41,21 @@ public:
 	afx_msg void OnBnClickedButton1();
 	RG rg;
 
+	double m_Na;
+	double m_L;
+	double m_V;
+
+	LRESULT OnDoIteration(WPARAM wParam, LPARAM lParam);
+	int m_Dots;
 };
+
+
+
+/*
+Параметры для L = 2 мкм
+	Na = 0.5e23
+	V = 1e-7
+
+
+
+*/

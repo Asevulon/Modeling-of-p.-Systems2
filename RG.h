@@ -2,16 +2,19 @@
 
 #include<vector>
 
+
+#define MS_DO_ITERATION WM_USER + 1
+
 class RG
 {
 private:
 	double x;
 	double y;
 	double z;
-
-
-
-	
+	double y_;
+	double e_betta;
+	double e_alpha;
+	int e_iter;
 
 	double h;
 
@@ -22,6 +25,8 @@ protected:
 	inline double z_(double x, double y, double dy);
 	inline double y_z(double z);
 
+	inline double EulerF(double x, double f_alpha, int i);
+	inline double EulerB(double x, double f_y, int i);
 public:
 	void SetXYZ(double x, double y, double z);
 	double GetX();
@@ -38,7 +43,11 @@ public:
 	void DoRGStepForward();
 	void DoRGStepBack();
 	void DoMainJob();
-	std::vector<double>keys, valsY, valsZ, prevVals, alpha, betta;
+
+	void EulerForward();
+	void RG::EulerBackward();
+
+	std::vector<double>keys, valsY, valsZ, prevVals, alpha, betta, valsOut;
 
 	double psy0;
 	double na;
@@ -49,4 +58,13 @@ public:
 	double yb;
 
 	bool stop = false;
+
+
+	double Na;
+	double N0;
+	double fi0;
+	double Ld;
+	double diff(std::vector<double>& left, std::vector<double>& right);
+
+	HWND parent;
 };
