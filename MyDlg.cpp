@@ -59,8 +59,8 @@ BOOL MyDlg::OnInitDialog()
 	drw.SetTitle(L"Тестим рунге-кутту");
 	rg.parent = GetSafeHwnd();
 
-	m_V = 1e-7;
-	m_Na = 0.5e23;
+	m_V = 5;
+	m_Na = 50;
 	m_L = 2e-6;
 	m_Dots = 500;
 	UpdateData(FALSE);
@@ -113,18 +113,19 @@ void MyDlg::OnBnClickedOk()
 	//rg.Na = 0.5e23;
 	UpdateData();
 	rg.Na = m_Na;
-	rg.N0 = 1e25;
-	rg.fi0 = 0.026;
-	rg.Ld = sqrt(300 * 11.68 * 8.85418781762039 * 1e-12 * 1.380649 * 1e-23 / (1.602176634 * 1e-19 * 1.602176634 * 1e-19 * rg.Na));
+	rg.N0 = 1e15;
+	rg.fi0 = 1;
+	rg.Ld = sqrt(300 * 11.68 * 8.85418781762039 * 1e-12 * 1.380649 * 1e-23 / (1.602176634 * 1e-19 * 1.602176634 * 1e-19 * rg.Na * rg.N0));
 	//rg.psy0 = 1e-7 / rg.fi0;
 	rg.psy0 = m_V / rg.fi0;
-	rg.na = rg.Na / rg.N0;
+	rg.na = rg.Na;
 	//rg.L = 2e-6 / rg.Ld;
 	rg.L = m_L / rg.Ld;
 	rg.SetH(rg.L / (m_Dots - 1));
 
 	rg.prevVals = rg.MakeStartVals();
 
+	rg.stop = false;
 	PostMessage(MS_DO_ITERATION);
 }
 

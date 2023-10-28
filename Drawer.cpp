@@ -107,7 +107,7 @@ void Drawer::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 
 		CString str;
-		str.Format(L"%.7f", top - i * steplenY);
+		str.Format(L"%.2f", top - i * steplenY);
 
 		PointF strPoint;
 		strPoint.X = left - actWidth / 100 - CalcStringLen(lpDrawItemStruct->hDC, str) / xScale;
