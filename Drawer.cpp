@@ -115,7 +115,7 @@ void Drawer::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		matr.TransformPoints(&strPoint);
 		gr.DrawString(str, str.GetLength() + 1, &font, strPoint, &brush);
 
-		str.Format(L"%.7f", right - i * steplenX);
+		str.Format(L"%.6f", right - i * steplenX);
 
 		strPoint.X = right - i * steplenX - CalcStringLen(lpDrawItemStruct->hDC, str) / xScale / 2.;
 		strPoint.Y = bot + 6 / yScale;

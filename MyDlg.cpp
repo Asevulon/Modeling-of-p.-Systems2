@@ -56,7 +56,7 @@ BOOL MyDlg::OnInitDialog()
 
 	// TODO: добавьте дополнительную инициализацию
 	drw.SetPadding(10, 5, 22, 22);
-	drw.SetTitle(L"Тестим рунге-кутту");
+	drw.SetTitle(L"Расчет напряжения в легированном полупроводнике");
 	rg.parent = GetSafeHwnd();
 
 	m_V = 5;
@@ -136,7 +136,6 @@ void MyDlg::OnBnClickedButton1()
 		rg.test1();
 		rg.test2();
 		drw.SetData(rg.valsOut, rg.keys);
-		drw.SetTitle(L"y(x)");
 		drw.Invalidate();
 		if (rg.stop)MessageBox(L"STOP", L"STOP", MB_OK);
 }
@@ -147,7 +146,6 @@ LRESULT MyDlg::OnDoIteration(WPARAM wParam, LPARAM lParam)
 	rg.test1();
 	rg.test2();
 	drw.SetData(rg.valsOut, rg.keys);
-	drw.SetTitle(L"y(x)");
 	drw.Invalidate();
 	if (rg.stop)MessageBox(L"STOP", L"STOP", MB_ICONHAND);
 	else PostMessage(MS_DO_ITERATION);
